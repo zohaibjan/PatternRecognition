@@ -1,0 +1,36 @@
+function program = mainProgram()
+
+% Problem = dataSetNames();                 % Get list of dataset names
+addpath(genpath('P-Data'));
+Problem = {'hepatitis', 'fertility', 'zoo', 'appendicitis',...
+   'segment'}
+
+
+%% Model SETTINGS
+params.numOfFolds = 10;                   % Create CROSS VALIDATION FOLDS
+params.noOfClusters = 10;                  % For nth root of clustering
+params.classifiers = {'ANN', 'SVM', 'KNN', 'DT', 'DISCR', 'NB'};
+params.trainFunctionANN={'trainlm','trainbfg','trainrp','trainscg','traincgb','traincgf','traincgp','trainoss','traingdx'};
+params.trainFunctionDiscriminant = {'pseudoLinear','pseudoQuadratic'};
+params.kernelFunctionSVM={'gaussian','polynomial','linear'};
+
+%% MAIN LOOP
+for j =2:10
+   params.noOfclusters = j; 
+parfor i=1:length(Problem)
+    p_name = Problem{i};
+    disp(p_name);
+    results = runTraining(p_name, params);
+    saveResults(results, p_name);
+end
+
+end
+
+end
+
+
+
+
+
+
+

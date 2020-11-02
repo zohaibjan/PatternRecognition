@@ -1,0 +1,62 @@
+function results = runTraining(p_name , params)
+warning('off','all');
+
+data = load(p_name);
+data = [data.X , data.y];
+
+%% Create CROSS VALIDATION FOLDS
+numOfFolds = params.numOfFolds;
+cvFolds = cvpartition(data(:,end), 'KFold', numOfFolds);
+accuracy = [];
+optaccuracy = [];
+noOfClusters = params.noOfClusters;
+
+%% ITERATE OVER THE NUMBER OF FOLDS
+for fold=1:numOfFolds
+    classifierIndex = 1;
+    classifiers = {};
+    idx = cvFolds.test(fold);
+    trainData = data(~idx,:);
+    testData = data(idx,:);
+    
+    %% SEPARATE VALIDATION DATA PER FOLD
+    cv = cvpartition(trainData(:,end), 'holdout', 0.1);
+    idxs = cv.test;
+    validationData = trainData(idxs,:);
+    trainData = trainData(~idxs, :);
+    
+    trainX = trainData(:, 1:end-1);
+    trainy = trainData(:, end);
+    
+    testX = testData(:, 1:end-1);
+    testy = testData(:, end);
+    
+    valX = validationData(:, 1:end-1);
+    valy = validationData(:, end);
+    
+     
+    allClusters = generateClusters(trainX, trainy, params);
+
+    
+    for c=allClusters
+        id = c.idxs;
+        X = trainX(find(id), :);
+        y = trainy(find(c.idxs), :);
+        classifiers{classifierIndex} = getCNN(X, y);
+        classifierIndex = classifierIndex + 1;
+    end
+    
+    opt = ensembleSelection(classifiers, valX, valy);
+    accuracy(fold) = fusion(opt, testX, testy);
+    optaccuracy(fold) = fusion(classifiers, testX, testy);
+end
+
+results.optaccuracy = mean(optaccuracy);
+results.stdDev = std(accuracy);
+results.accuracy = mean(accuracy);
+% end
+
+
+end
+
+

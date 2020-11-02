@@ -1,0 +1,2 @@
+Data Set,MajVote Accuracy,Std dev., Cluster based accuracy, Std. dev, ES Accuracy, ES Std Dev. 
+thyroid, 0.327476,0.094170, 0.899182, 0.065397, 0.966941, 0.052334
