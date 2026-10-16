@@ -1,5 +1,4 @@
 function results = runTraining_CIFAR(p_name , params)
-warning('off','all');
 
 accuracy = [];
 optaccuracy = [];

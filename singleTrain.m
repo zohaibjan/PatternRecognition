@@ -1,5 +1,4 @@
 function results = singleTrain(p_name , params)
-warning('off','all');
 
 mVote = [];
 

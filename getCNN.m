@@ -21,7 +21,7 @@ if height > 5
         softmaxLayer
         classificationLayer
         ];
-elseif height < 5
+else
     layers = [
         imageInputLayer([height 1 1])
         convolution2dLayer([2 1],height-1,'Stride',1)

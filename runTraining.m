@@ -1,5 +1,5 @@
 function results = runTraining(p_name , params)
-warning('off','all');
+
 params.p_name = p_name;
 mVote = [];
 e_mVote = [];

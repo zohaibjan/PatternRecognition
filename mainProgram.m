@@ -1,4 +1,4 @@
-function program = mainProgram()
+function mainProgram()
 
 % Problem = dataSetNames();                 % Get list of dataset names
 addpath(genpath('P-Data'));
