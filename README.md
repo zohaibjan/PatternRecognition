@@ -42,6 +42,10 @@ The seed is a starting point for recording runs; nested seed resets, parallel wo
 
 Silhouette K candidates are bounded by available distinct training feature rows; label columns are excluded, tiny classes remain valid and class-count reporting includes one-cluster cases. Feature-only centroids and augmentation distances now share raw feature coordinates. CNN predictions preserve numeric category names. `runTraining.m` still uses a fixed ten-fold loop; `getCNN.m` retains the smaller-network branch for five-feature inputs.
 
+## Runtime follow-up — October 2026
+
+The historical getCIFAR helper expects 96x96 RGB images (27648 column-major values per row), not 32x32 CIFAR inputs. cifarImages transposes sample rows before reshaping, preventing pixels from different images from mixing. The legacy image driver loads named fields explicitly, routes with feature-only centroids and batches classify calls by model. The large 96x96 image experiment itself has not been trained end to end.
+
 ## Correctness review — October 2026
 
 This pass fixes implementation defects; it does not validate the associated research results. Changes can alter model pools, predictions and measured scores. Re-run the experiments before comparing corrected code with historical CSVs or published results.
@@ -53,6 +57,6 @@ This pass fixes implementation defects; it does not validate the associated rese
 
 See [the code review](docs/code-review.md) for repository-specific changes, tests and remaining limitations.
 
-**Validation:** all MATLAB sources were statically parsed/linted with MISS_HIT. MATLAB and its learner toolboxes are unavailable in the review environment. The MATLAB regression suites and full training runs have **not been executed** here. Run `runtests('tests')` and `assertSuccess(results)` in MATLAB before using the corrected experiments.
+**Validation:** 16 regression/smoke tests passed in MATLAB R2024b on Linux through [GitHub Actions](https://github.com/zohaibjan/PatternRecognition/actions/workflows/matlab-tests.yml). Tests include real toolbox execution on synthetic data. Full research datasets and published accuracy results have not been reproduced. See [validation evidence and limits](docs/validation.md).
 
 [Profile and project directory](https://github.com/zohaibjan)
