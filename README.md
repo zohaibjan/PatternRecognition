@@ -40,8 +40,19 @@ The seed is a starting point for recording runs; nested seed resets, parallel wo
 
 ## Review notes and reproducibility limits
 
-`runTraining.m` currently uses a fixed ten-fold loop. The historical centroid calculation includes the label column while `fusion.m` compares feature-only rows; review that dimension/scale mismatch before claiming an end-to-end reproduction. Also review categorical prediction conversion and all-tied ensemble scores. These scientific conventions have not been silently replaced. The previously missing five-feature CNN branch is now covered by the smaller-network branch.
+Silhouette K candidates are bounded by available distinct training feature rows; label columns are excluded, tiny classes remain valid and class-count reporting includes one-cluster cases. Feature-only centroids and augmentation distances now share raw feature coordinates. CNN predictions preserve numeric category names. `runTraining.m` still uses a fixed ten-fold loop; `getCNN.m` retains the smaller-network branch for five-feature inputs.
 
-The cleanup aligns function/file names, restores visible warnings, makes CSV handles close on errors, and tests constant-feature normalisation plus CSV append behaviour. MATLAB experiments and the new utility tests have **not** been executed in the cleanup environment, which has no MATLAB installation. Static parsing is not a reproduction of the paper.
+## Correctness review — October 2026
+
+This pass fixes implementation defects; it does not validate the associated research results. Changes can alter model pools, predictions and measured scores. Re-run the experiments before comparing corrected code with historical CSVs or published results.
+
+- Label conversion uses numeric category names, not categorical indices.
+- Voting rejects empty/nonfinite inputs; a prediction failure is reported rather than counted as a fabricated class-one vote.
+- CNN output categories retain their numeric label names, including zero and nonconsecutive labels.
+- Synthetic checks cover normalization, CSV append behavior and the new prediction/selection boundaries. Additional cluster checks run where applicable.
+
+See [the code review](docs/code-review.md) for repository-specific changes, tests and remaining limitations.
+
+**Validation:** all MATLAB sources were statically parsed/linted with MISS_HIT. MATLAB and its learner toolboxes are unavailable in the review environment. The MATLAB regression suites and full training runs have **not been executed** here. Run `runtests('tests')` and `assertSuccess(results)` in MATLAB before using the corrected experiments.
 
 [Profile and project directory](https://github.com/zohaibjan)

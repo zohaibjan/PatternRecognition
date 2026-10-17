@@ -1,13 +1,11 @@
-function acc=majVote(classifiers, X, y )
-c = length(classifiers);
-decisionMatrix = zeros(length(X(:,1)), c);
-index = 1;
-for i=1:c
-    decisionMatrix(:,index) = getCNNPred(classifiers{1,i}, X);
-    index = index + 1;
+function acc = majVote(classifiers, X, y)
+%MAJVOTE Vote using the numeric names of CNN output categories.
+if isempty(classifiers)
+    error('Research:EmptyEnsemble', 'At least one CNN is required.');
 end
-decisionMatrix = categorical(mode(decisionMatrix, 2));
-y = categorical(y);
-acc = mean(decisionMatrix == y);
+predictions = zeros(size(X, 1), numel(classifiers));
+for i = 1:numel(classifiers)
+    predictions(:, i) = getCNNPred(classifiers{i}, X);
 end
-
+acc = mean(votePredictions(predictions) == numericLabels(y));
+end
