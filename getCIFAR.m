@@ -1,6 +1,8 @@
-function model = getCIFAR(X, y)
-X = double(X/255);
-X = reshape(X, [96, 96, 3, size(X,1)]);
+function model = getCIFAR(X, y, maxEpochs)
+%GETCIFAR Historical name: this network expects flattened 96x96 RGB images.
+if nargin < 3, maxEpochs = 30; end
+validateattributes(maxEpochs,{'numeric'},{'scalar','integer','positive'});
+X = cifarImages(X);
 y = categorical(y);
 netDepth = 4; % netDepth controls the depth of the convolutional blocks
 netWidth = 96; % netWidth controls the number of filters in a convolutional block
@@ -13,7 +15,7 @@ layers = [
     maxPooling2dLayer(2,'Stride',2)
     convolutionalBlock(4*netWidth,netDepth)
     averagePooling2dLayer(8)
-    fullyConnectedLayer(10)
+    fullyConnectedLayer(numel(categories(y)))
     softmaxLayer
     classificationLayer
     ];
@@ -26,7 +28,7 @@ options = trainingOptions('sgdm', ...
     'MiniBatchSize',miniBatchSize, ... % Set the MiniBatchSize.
     'Verbose',true, ... % Do not send command line output.
     'L2Regularization',1e-10, ...
-    'MaxEpochs',30, ...
+    'MaxEpochs',maxEpochs, ...
     'Shuffle','every-epoch', ...
     'LearnRateSchedule','piecewise', ...
     'LearnRateDropFactor',0.1, ...

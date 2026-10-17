@@ -1,38 +1,31 @@
-function results = runTraining_CIFAR(p_name , params)
-
-accuracy = [];
-optaccuracy = [];
-ensemble = {};
-classifierIndex = 1;
-load([pwd,filesep,'P-Data',filesep,p_name]);
-
-
-noOfClasses = unique(train(:,end))';
-clusters = {};
-totalClusters = 1;
-
-clusters = generateClusters(train, params);
-[balancedClusters, centroids] = balanceClusters(clusters, train);
-
-for c=balancedClusters
-    X = c{1,1}(:, 1:end-1);
-    y = (c{1,1}(:, end));
-    ensemble{1, classifierIndex} = getCIFAR(X, y);
-    classifierIndex = classifierIndex + 1;
+function results = runTraining_CIFAR(p_name, params)
+%RUNTRAINING_CIFAR Legacy 96x96 RGB experiment; train and test remain separate.
+loaded = load(fullfile(pwd,'P-Data',p_name));
+if ~isfield(loaded,'train') || ~isfield(loaded,'test')
+    error('Research:ImageDataset','Dataset must contain train and test labelled matrices.');
 end
-
-decisionMatrix = zeros(length(test),1);
-
-for i=1:length(test)
-    distances = zeros(1, length(centroids));
-    for j =1:length(centroids)
-        distances(j) = norm(test(i,:) - centroids{1,j});
+trainingData = loaded.train;
+testData = loaded.test;
+clusters = generateClusters(trainingData,params);
+[balanced,centroids] = balanceClusters(clusters,trainingData);
+models = cell(1,numel(balanced));
+for k = 1:numel(balanced)
+    rows = balanced{k};
+    models{k} = getCIFAR(rows(:,1:end-1),rows(:,end));
+end
+X = testData(:,1:end-1);
+centers = vertcat(centroids{:});
+labels = zeros(size(X,1),1);
+routes = zeros(size(X,1),1);
+for k = 1:size(X,1)
+    % First centroid breaks equal-distance ties deterministically.
+    [~,routes(k)] = min(sum(bsxfun(@minus,centers,X(k,:)).^2,2));
+end
+for k = 1:numel(models)
+    rows = routes==k;
+    if any(rows)
+        labels(rows) = numericLabels(classify(models{k},cifarImages(X(rows,:))));
     end
-    index = find(distances == min(distances));
-    decisionMatrix(i,:) = predict(ensemble{1,index}, test(i,1:end-1));
 end
-
-groundTruth = test(:, end);
-results = mean(decisionMatrix == groundTruth);
-
+results = mean(labels == testData(:,end));
 end
